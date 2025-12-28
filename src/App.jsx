@@ -252,7 +252,7 @@ export default function App() {
             />
             <div className="relative">
               <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Kamyar&backgroundColor=b6e3f4"
+                src="/public/me.jpeg"
                 alt="کامیار"
                 className={`w-full max-w-md mx-auto rounded-2xl border-2 transition-colors ${
                   theme === "dark"
