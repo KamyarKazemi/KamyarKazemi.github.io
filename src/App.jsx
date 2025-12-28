@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import photo from "../public/me.jpeg";
 
 export default function App() {
   const [theme, setTheme] = useState("dark");
   const [activeSection, setActiveSection] = useState("home");
-  const [githubStats, setGithubStats] = useState(null);
   const [mousePos] = useState({ x: 0, y: 0 });
 
   const { scrollYProgress } = useScroll();
@@ -20,24 +19,6 @@ export default function App() {
     }
   }, [theme]);
 
-  useEffect(() => {
-    fetch("https://api.github.com/users/KamyarKazemi")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json();
-      })
-      .then((data) => {
-        setGithubStats(data);
-      })
-      .catch(() => {
-        setGithubStats({
-          public_repos: 12,
-          followers: 8,
-          following: 15,
-        });
-      });
-  }, []);
-
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -51,6 +32,27 @@ export default function App() {
     { name: "JavaScript", level: 100, icon: "📜" },
     { name: "CSS/Tailwind", level: 100, icon: "🎨" },
     { name: "Git", level: 75, icon: "🔧" },
+  ];
+
+  const projects = [
+    {
+      title: "پورتفولیو شخصی",
+      desc: "یک وب‌سایت مدرن و تعاملی با React و Framer Motion",
+      tech: ["React", "Tailwind", "Framer Motion"],
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      title: "پروژه‌های کارخانه نوآوری",
+      desc: "توسعه رابط کاربری برای استارتاپ‌های مختلف",
+      tech: ["React", "Vite", "JavaScript"],
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      title: "کامپوننت‌های قابل استفاده مجدد",
+      desc: "ساخت کتابخانه کامپوننت‌های UI برای استفاده در پروژه‌ها",
+      tech: ["React", "CSS", "Design Systems"],
+      color: "from-orange-500 to-red-500",
+    },
   ];
 
   const containerVariants = {
@@ -111,11 +113,11 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             className="hidden md:flex gap-8"
           >
-            {["خانه", "درباره", "مهارت‌ها", "گیت‌هاب"].map((item, idx) => (
+            {["خانه", "درباره", "مهارت‌ها", "پروژه‌ها"].map((item, idx) => (
               <button
                 key={idx}
                 onClick={() =>
-                  scrollToSection(["home", "about", "skills", "github"][idx])
+                  scrollToSection(["home", "about", "skills", "projects"][idx])
                 }
                 className={`transition-colors relative bg-transparent border-none cursor-pointer ${
                   theme === "dark"
@@ -125,7 +127,7 @@ export default function App() {
               >
                 {item}
                 {activeSection ===
-                  ["home", "about", "skills", "github"][idx] && (
+                  ["home", "about", "skills", "projects"][idx] && (
                   <motion.div
                     layoutId="activeSection"
                     className="absolute -bottom-1 right-0 left-0 h-0.5 bg-blue-500"
@@ -183,7 +185,9 @@ export default function App() {
 
             <motion.p
               variants={itemVariants}
-              className="text-xl text-zinc-400 leading-relaxed"
+              className={`text-xl leading-relaxed ${
+                theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+              }`}
             >
               ۱۷ ساله، علاقه‌مند به ساخت تجربه‌های کاربری جذاب و تعاملی با React
             </motion.p>
@@ -212,8 +216,8 @@ export default function App() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => scrollToSection("github")}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors cursor-pointer border-none"
+                onClick={() => scrollToSection("projects")}
+                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors cursor-pointer border-none text-white"
               >
                 مشاهده پروژه‌ها
               </motion.button>
@@ -222,7 +226,7 @@ export default function App() {
                 whileTap={{ scale: 0.95 }}
                 href="https://github.com/KamyarKazemi"
                 target="_blank"
-                className={`px-8 py-3 border rounded-lg font-semibold transition-colors ${
+                className={`px-8 py-3 border rounded-lg font-semibold transition-colors flex items-center ${
                   theme === "dark"
                     ? "bg-zinc-800 hover:bg-zinc-700 border-zinc-700"
                     : "bg-zinc-100 hover:bg-zinc-200 border-zinc-300"
@@ -395,7 +399,7 @@ export default function App() {
         </div>
       </section>
 
-      <section id="github" className="py-20 px-6 relative z-10">
+      <section id="projects" className="py-20 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -403,74 +407,55 @@ export default function App() {
             viewport={{ once: true }}
             className="text-4xl font-bold text-center mb-16"
           >
-            آمار گیت‌هاب
+            پروژه‌های من
           </motion.h2>
 
-          <AnimatePresence mode="wait">
-            {githubStats ? (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid md:grid-cols-3 gap-6 mb-12"
+          >
+            {projects.map((project, idx) => (
               <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="grid md:grid-cols-3 gap-6 mb-12"
+                key={idx}
+                variants={itemVariants}
+                whileHover={{ y: -10, scale: 1.02 }}
+                className={`p-6 border rounded-2xl transition-all group cursor-pointer ${
+                  theme === "dark"
+                    ? "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
+                    : "bg-white border-zinc-200 hover:border-zinc-300"
+                }`}
               >
-                {[
-                  {
-                    icon: "📦",
-                    value: githubStats.public_repos,
-                    label: "مخزن عمومی",
-                  },
-                  { icon: "👥", value: githubStats.followers, label: "فالوور" },
-                  {
-                    icon: "💫",
-                    value: githubStats.following,
-                    label: "فالوینگ",
-                  },
-                ].map((stat, idx) => (
-                  <motion.div
-                    key={idx}
-                    variants={itemVariants}
-                    whileHover={{ y: -10 }}
-                    className={`p-8 border rounded-2xl text-center transition-all ${
-                      theme === "dark"
-                        ? "bg-zinc-900 border-zinc-800 hover:border-blue-500"
-                        : "bg-white border-zinc-200 hover:border-blue-400"
-                    }`}
-                  >
-                    <div className="text-5xl mb-4">{stat.icon}</div>
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      whileInView={{ scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{
-                        type: "spring",
-                        duration: 0.6,
-                        delay: idx * 0.1,
-                      }}
-                      className="text-4xl font-bold text-blue-500 mb-2"
+                <div
+                  className={`w-full h-2 rounded-full bg-linear-to-r ${project.color} mb-6`}
+                />
+                <h3 className="text-xl font-bold mb-3">{project.title}</h3>
+                <p
+                  className={`mb-4 leading-relaxed ${
+                    theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+                  }`}
+                >
+                  {project.desc}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {project.tech.map((tech, i) => (
+                    <span
+                      key={i}
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        theme === "dark"
+                          ? "bg-zinc-800 text-zinc-300"
+                          : "bg-zinc-100 text-zinc-700"
+                      }`}
                     >
-                      {stat.value}
-                    </motion.div>
-                    <div
-                      className={
-                        theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-                      }
-                    >
-                      {stat.label}
-                    </div>
-                  </motion.div>
-                ))}
+                      {tech}
+                    </span>
+                  ))}
+                </div>
               </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center text-zinc-400 py-12"
-              >
-                در حال بارگذاری...
-              </motion.div>
-            )}
-          </AnimatePresence>
+            ))}
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -489,7 +474,7 @@ export default function App() {
                   : "bg-white hover:bg-zinc-50 border-zinc-300 hover:border-blue-400"
               }`}
             >
-              <span>مشاهده پروفایل گیت‌هاب</span>
+              <span>مشاهده همه پروژه‌ها در گیت‌هاب</span>
               <motion.span
                 animate={{ x: [-5, 0, -5] }}
                 transition={{
