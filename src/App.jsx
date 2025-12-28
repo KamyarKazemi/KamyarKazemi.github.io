@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
+import photo from "../public/me.jpeg";
 
 export default function App() {
   const [theme, setTheme] = useState("dark");
@@ -252,7 +253,7 @@ export default function App() {
             />
             <div className="relative">
               <img
-                src="/public/me.jpeg"
+                src={photo}
                 alt="کامیار"
                 className={`w-full max-w-md mx-auto rounded-2xl border-2 transition-colors ${
                   theme === "dark"
