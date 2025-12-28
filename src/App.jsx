@@ -20,25 +20,13 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    const controller = new AbortController();
-
-    fetch("https://api.github.com/users/KamyarKazemi", {
-      signal: controller.signal,
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
-      },
-    })
+    fetch("https://api.github.com/users/KamyarKazemi")
       .then((res) => {
-        if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+        if (!res.ok) throw new Error("Failed to fetch");
         return res.json();
       })
       .then((data) => {
-        setGithubStats({
-          public_repos: data.public_repos,
-          followers: data.followers,
-          following: data.following,
-        });
+        setGithubStats(data);
       })
       .catch(() => {
         setGithubStats({
@@ -47,8 +35,6 @@ export default function App() {
           following: 15,
         });
       });
-
-    return () => controller.abort();
   }, []);
 
   const scrollToSection = (sectionId) => {
