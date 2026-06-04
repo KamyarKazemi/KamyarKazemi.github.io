@@ -1,518 +1,383 @@
 import { useEffect, useState } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
 import photo from "../public/me.jpeg";
 
 export default function App() {
   const [theme, setTheme] = useState("dark");
+  const [lang, setLang] = useState("en");
   const [activeSection, setActiveSection] = useState("home");
-  const [mousePos] = useState({ x: 0, y: 0 });
+  const [loaded, setLoaded] = useState(false);
 
   const { scrollYProgress } = useScroll();
-  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.8]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+
+  const isRTL = lang === "fa";
 
   useEffect(() => {
-    if (theme === "light") {
-      document.documentElement.classList.remove("dark");
-    } else {
-      document.documentElement.classList.add("dark");
-    }
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+  }, [isRTL]);
+
+  useEffect(() => {
+    if (theme === "light") document.documentElement.classList.remove("dark");
+    else document.documentElement.classList.add("dark");
   }, [theme]);
 
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-      setActiveSection(sectionId);
-    }
-  };
-
-  const skills = [
-    { name: "React", level: 100, icon: "⚛️" },
-    { name: "JavaScript", level: 100, icon: "📜" },
-    { name: "CSS/Tailwind", level: 100, icon: "🎨" },
-    { name: "Git", level: 75, icon: "🔧" },
-  ];
-
-  const projects = [
-    {
-      title: "پورتفولیو شخصی",
-      desc: "یک وب‌سایت مدرن و تعاملی با React و Framer Motion",
-      tech: ["React", "Tailwind", "Framer Motion"],
-      color: "from-blue-500 to-cyan-500",
-    },
-    {
-      title: "پروژه‌های کارخانه نوآوری",
-      desc: "توسعه رابط کاربری برای استارتاپ‌های مختلف",
-      tech: ["React", "Vite", "JavaScript"],
-      color: "from-purple-500 to-pink-500",
-    },
-    {
-      title: "کامپوننت‌های قابل استفاده مجدد",
-      desc: "ساخت کتابخانه کامپوننت‌های UI برای استفاده در پروژه‌ها",
-      tech: ["React", "CSS", "Design Systems"],
-      color: "from-orange-500 to-red-500",
-    },
-  ];
+  useEffect(() => {
+    const t = setTimeout(() => setLoaded(true), 200);
+    return () => clearTimeout(t);
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
+    show: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 },
+      transition: { staggerChildren: 0.15 },
     },
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
+    hidden: { opacity: 0, y: 20, filter: "blur(6px)" },
+    show: {
       opacity: 1,
-      transition: { duration: 0.5 },
+      y: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.6 },
     },
   };
 
+  const languageVariants = {
+    initial: (dir) => ({
+      opacity: 0,
+      x: dir === "rtl" ? -30 : 30,
+      filter: "blur(10px)",
+    }),
+    animate: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.35 },
+    },
+    exit: (dir) => ({
+      opacity: 0,
+      x: dir === "rtl" ? 30 : -30,
+      filter: "blur(10px)",
+      transition: { duration: 0.25 },
+    }),
+  };
+
+  const t = {
+    en: {
+      name: "Kamyar",
+      role: "Junior Front-End Developer",
+      heroTitle: "Hi, I'm Kamyar",
+      caption:
+        "Junior front‑end developer focused on building modern and interactive web interfaces. I’ve been working with Shiraz Startup Company for over a year, collaborating on real projects and constantly improving my skills with React and modern web tools.",
+      viewProjects: "View Projects",
+      about: "About Me",
+      skills: "Toolbox",
+      projects: "Projects",
+      github: "See more on GitHub",
+      instagram: "Instagram",
+      available: "Available for projects",
+      aboutCards: [
+        {
+          title: "Experience",
+          desc: "Working with Shiraz startup company for more than a year, contributing to real product interfaces.",
+        },
+        {
+          title: "Focus",
+          desc: "Building responsive, fast and maintainable UI with React and modern CSS tools.",
+        },
+        {
+          title: "Purpose",
+          desc: "My goal is to grow into a strong product engineer by building meaningful software and constantly learning.",
+        },
+      ],
+      projectsList: [
+        {
+          title: "Personal Portfolio",
+          desc: "A modern interactive portfolio built with React and motion.",
+        },
+        {
+          title: "Startup UI Work",
+          desc: "Front-end interfaces built for internal startup tools.",
+        },
+        {
+          title: "Reusable Components",
+          desc: "A small library of reusable UI components.",
+        },
+      ],
+    },
+
+    fa: {
+      name: "کامیار",
+      role: "توسعه‌دهنده فرانت‌اند",
+      heroTitle: "سلام، من کامیار هستم",
+      caption:
+        "توسعه‌دهنده فرانت‌اند که روی ساخت رابط‌های کاربری مدرن و تعاملی تمرکز دارد. بیش از یک سال است که در کارخانه نوآوری و فناوری شیراز روی پروژه‌های واقعی کار می‌کنم و مهارت‌هایم را با React و ابزارهای مدرن وب توسعه می‌دهم.",
+      viewProjects: "مشاهده پروژه‌ها",
+      about: "درباره من",
+      skills: "تکنولوژی‌ها",
+      projects: "پروژه‌ها",
+      github: "مشاهده در گیت‌هاب",
+      instagram: "اینستاگرام",
+      available: "در دسترس برای پروژه",
+      aboutCards: [
+        {
+          title: "تجربه",
+          desc: "بیش از یک سال همکاری با کارخانه نوآوری و فناوری شیراز.",
+        },
+        {
+          title: "تمرکز",
+          desc: "ساخت رابط‌های کاربری سریع، ریسپانسیو و تمیز با React.",
+        },
+        {
+          title: "هدف",
+          desc: "تبدیل شدن به یک مهندس محصول قوی با ساخت نرم‌افزارهای واقعی.",
+        },
+      ],
+      projectsList: [
+        {
+          title: "پورتفولیو شخصی",
+          desc: "یک وبسایت مدرن با React و motion.",
+        },
+        {
+          title: "پروژه‌های استارتاپی",
+          desc: "رابط‌های کاربری برای ابزارهای داخلی استارتاپ.",
+        },
+        {
+          title: "کامپوننت‌های قابل استفاده مجدد",
+          desc: "ساخت مجموعه‌ای از کامپوننت‌های React.",
+        },
+      ],
+    },
+  };
+
+  const stack = [
+    { name: "React", icon: "⚛️", desc: "Hooks, component architecture" },
+    { name: "JavaScript", icon: "📜", desc: "Modern ES6+ patterns" },
+    { name: "Tailwind / CSS", icon: "🎨", desc: "Responsive UI design" },
+    { name: "Git", icon: "🔧", desc: "Version control workflow" },
+  ];
+
+  const scrollToSection = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setActiveSection(id);
+  };
+
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={loaded ? { opacity: 1 } : {}}
+      transition={{ duration: 0.8 }}
       className={`min-h-screen transition-colors duration-500 ${
         theme === "dark"
           ? "bg-zinc-950 text-zinc-100"
           : "bg-white text-zinc-900"
       }`}
-      dir="rtl"
     >
-      <motion.div
-        className="fixed pointer-events-none z-0 rounded-full blur-3xl opacity-20"
-        style={{
-          width: 400,
-          height: 400,
-          left: mousePos.x - 200,
-          top: mousePos.y - 200,
-          background: theme === "dark" ? "rgb(59 130 246)" : "rgb(37 99 235)",
-        }}
-      />
+      <nav className="fixed top-0 w-full backdrop-blur-lg border-b border-zinc-800 z-50">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="font-bold text-xl text-blue-500">{t[lang].name}</div>
 
-      <nav
-        className={`fixed top-0 w-full backdrop-blur-lg border-b z-50 transition-colors duration-500 ${
-          theme === "dark"
-            ? "bg-zinc-900/80 border-zinc-800"
-            : "bg-white/80 border-zinc-200"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-2xl font-bold text-blue-500"
-          >
-            کامیار
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="hidden md:flex gap-8"
-          >
-            {["خانه", "درباره", "مهارت‌ها", "پروژه‌ها"].map((item, idx) => (
+          <div className="flex gap-6 items-center">
+            {["home", "about", "skills", "projects"].map((sec) => (
               <button
-                key={idx}
-                onClick={() =>
-                  scrollToSection(["home", "about", "skills", "projects"][idx])
-                }
-                className={`transition-colors relative bg-transparent border-none cursor-pointer ${
-                  theme === "dark"
-                    ? "text-zinc-400 hover:text-zinc-100"
-                    : "text-zinc-600 hover:text-zinc-900"
-                }`}
+                key={sec}
+                onClick={() => scrollToSection(sec)}
+                className="cursor-pointer opacity-70 hover:opacity-100"
               >
-                {item}
-                {activeSection ===
-                  ["home", "about", "skills", "projects"][idx] && (
-                  <motion.div
-                    layoutId="activeSection"
-                    className="absolute -bottom-1 right-0 left-0 h-0.5 bg-blue-500"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
+                {t[lang][sec]}
               </button>
             ))}
-          </motion.div>
 
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className={`w-10 h-10 rounded-full border flex items-center justify-center text-xl transition-colors ${
-              theme === "dark"
-                ? "bg-zinc-800 border-zinc-700"
-                : "bg-zinc-100 border-zinc-300"
-            }`}
-          >
-            {theme === "dark" ? "☀️" : "🌙"}
-          </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setLang(lang === "en" ? "fa" : "en")}
+              className="cursor-pointer px-3 py-1 border rounded-md"
+            >
+              {lang === "en" ? "FA" : "EN"}
+            </motion.button>
+
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="cursor-pointer text-xl"
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+          </div>
         </div>
       </nav>
 
-      <motion.section
-        id="home"
-        style={{ opacity, scale }}
-        className="relative pt-32 pb-20 px-6 z-10"
-      >
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-6"
+      <AnimatePresence mode="wait" custom={isRTL ? "rtl" : "ltr"}>
+        <motion.div
+          key={lang}
+          variants={languageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          custom={isRTL ? "rtl" : "ltr"}
+        >
+          <motion.section
+            id="home"
+            style={{ opacity: heroOpacity }}
+            className="pt-32 pb-24 px-6"
           >
             <motion.div
-              variants={itemVariants}
-              className={`inline-block px-4 py-2 border rounded-full text-sm transition-colors ${
-                theme === "dark"
-                  ? "bg-zinc-800 border-zinc-700"
-                  : "bg-zinc-100 border-zinc-300"
-              }`}
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center"
             >
-              توسعه‌دهنده فرانت‌اند
-            </motion.div>
+              <div className="space-y-6">
+                <motion.div variants={itemVariants} className="text-blue-500">
+                  {t[lang].role}
+                </motion.div>
 
-            <motion.h1
-              variants={itemVariants}
-              className="text-5xl md:text-6xl font-bold leading-tight"
-            >
-              سلام، من <span className="text-blue-500">کامیار</span> هستم
-            </motion.h1>
+                <motion.h1
+                  variants={itemVariants}
+                  className="text-5xl font-bold"
+                >
+                  {t[lang].heroTitle}
+                </motion.h1>
 
-            <motion.p
-              variants={itemVariants}
-              className={`text-xl leading-relaxed ${
-                theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-              }`}
-            >
-              ۱۷ ساله، علاقه‌مند به ساخت تجربه‌های کاربری جذاب و تعاملی با React
-            </motion.p>
+                <motion.p
+                  variants={itemVariants}
+                  className="text-zinc-400 text-lg"
+                >
+                  {t[lang].caption}
+                </motion.p>
 
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-wrap gap-3"
-            >
-              {["React Developer", "کارخانه نوآوری شیراز", "Junior Dev"].map(
-                (tag, idx) => (
-                  <span
-                    key={idx}
-                    className={`px-4 py-2 border rounded-full text-sm transition-colors ${
-                      theme === "dark"
-                        ? "bg-zinc-900 border-zinc-800"
-                        : "bg-zinc-50 border-zinc-200"
-                    }`}
+                <motion.div
+                  variants={itemVariants}
+                  className="flex gap-4 flex-wrap"
+                >
+                  <button
+                    onClick={() => scrollToSection("projects")}
+                    className="cursor-pointer px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
                   >
-                    {tag}
-                  </span>
-                )
-              )}
-            </motion.div>
+                    {t[lang].viewProjects}
+                  </button>
 
-            <motion.div variants={itemVariants} className="flex gap-4 pt-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => scrollToSection("projects")}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors cursor-pointer border-none text-white"
-              >
-                مشاهده پروژه‌ها
-              </motion.button>
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href="https://github.com/KamyarKazemi"
-                target="_blank"
-                className={`px-8 py-3 border rounded-lg font-semibold transition-colors flex items-center ${
-                  theme === "dark"
-                    ? "bg-zinc-800 hover:bg-zinc-700 border-zinc-700"
-                    : "bg-zinc-100 hover:bg-zinc-200 border-zinc-300"
-                }`}
-              >
-                GitHub
-              </motion.a>
-            </motion.div>
-          </motion.div>
+                  <a
+                    href="https://github.com/KamyarKazemi"
+                    target="_blank"
+                    className="cursor-pointer px-6 py-3 border rounded-lg hover:bg-zinc-800 transition"
+                  >
+                    GitHub
+                  </a>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="relative"
-          >
-            <motion.div
-              animate={{
-                scale: [1, 1.05, 1],
-                opacity: [0.2, 0.3, 0.2],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="absolute inset-0 bg-blue-500 rounded-full blur-3xl"
-            />
-            <div className="relative">
-              <img
-                src={photo}
-                alt="کامیار"
-                className={`w-full max-w-md mx-auto rounded-2xl border-2 transition-colors ${
-                  theme === "dark"
-                    ? "border-zinc-800 bg-zinc-900"
-                    : "border-zinc-200 bg-zinc-50"
-                }`}
-              />
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className={`absolute bottom-6 left-6 px-4 py-2 backdrop-blur-sm border rounded-full flex items-center gap-2 transition-colors ${
-                  theme === "dark"
-                    ? "bg-zinc-900/90 border-zinc-700"
-                    : "bg-white/90 border-zinc-300"
-                }`}
-              >
-                <motion.span
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-2 h-2 bg-green-500 rounded-full"
+                  <a
+                    href="https://instagram.com/"
+                    target="_blank"
+                    className="cursor-pointer px-6 py-3 border rounded-lg hover:bg-zinc-800 transition"
+                  >
+                    {t[lang].instagram}
+                  </a>
+                </motion.div>
+              </div>
+
+              <motion.div variants={itemVariants} className="relative">
+                <img
+                  src={photo}
+                  className="rounded-2xl border border-zinc-800"
                 />
-                <span className="text-sm">در دسترس برای پروژه</span>
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-      </motion.section>
 
-      <section id="about" className="py-20 px-6 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl font-bold text-center mb-16"
-          >
-            درباره من
-          </motion.h2>
-
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid md:grid-cols-3 gap-6"
-          >
-            {[
-              {
-                icon: "💻",
-                title: "تخصص من",
-                desc: "تمرکز روی ساخت رابط‌های کاربری سریع، زیبا و قابل استفاده با React و تکنولوژی‌های مدرن",
-              },
-              {
-                icon: "🎯",
-                title: "هدف من",
-                desc: "یادگیری مستمر و عمیق، نه سطحی. ساختن پروژه‌هایی که واقعاً مفید باشند",
-              },
-              {
-                icon: "🚀",
-                title: "محیط کاری",
-                desc: "فعال در کارخانه نوآوری شیراز و همکاری در پروژه‌های استارتاپی",
-              },
-            ].map((card, idx) => (
-              <motion.div
-                key={idx}
-                variants={itemVariants}
-                whileHover={{ y: -10 }}
-                className={`p-8 border rounded-2xl transition-all ${
-                  theme === "dark"
-                    ? "bg-zinc-900 border-zinc-800 hover:border-blue-500"
-                    : "bg-white border-zinc-200 hover:border-blue-400"
-                }`}
-              >
-                <div className="text-5xl mb-4">{card.icon}</div>
-                <h3 className="text-xl font-semibold mb-3">{card.title}</h3>
-                <p
-                  className={`leading-relaxed ${
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-                  }`}
-                >
-                  {card.desc}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      <section id="skills" className="py-20 px-6 relative z-10">
-        <div className="max-w-4xl mx-auto">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl font-bold text-center mb-16"
-          >
-            مهارت‌های من
-          </motion.h2>
-
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="space-y-8"
-          >
-            {skills.map((skill, idx) => (
-              <motion.div key={idx} variants={itemVariants}>
-                <div className="flex justify-between items-center mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{skill.icon}</span>
-                    <span className="font-semibold text-lg">{skill.name}</span>
-                  </div>
-                  <span className="text-blue-500 font-semibold">
-                    {skill.level}%
-                  </span>
+                <div className="absolute bottom-4 left-4 text-sm bg-zinc-900/80 px-3 py-1 rounded-full">
+                  ● {t[lang].available}
                 </div>
-                <div
-                  className={`h-3 rounded-full overflow-hidden ${
-                    theme === "dark" ? "bg-zinc-800" : "bg-zinc-200"
-                  }`}
-                >
+              </motion.div>
+            </motion.div>
+          </motion.section>
+
+          <section id="about" className="py-24 px-6">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold mb-12 text-center">
+                {t[lang].about}
+              </h2>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                {t[lang].aboutCards.map((c, i) => (
                   <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${skill.level}%` }}
-                    viewport={{ once: true }}
-                    transition={{
-                      duration: 1.5,
-                      delay: idx * 0.1,
-                      ease: "easeOut",
-                    }}
-                    className="h-full bg-linear-to-r from-blue-600 to-blue-400 rounded-full"
-                  />
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+                    key={i}
+                    whileHover={{ y: -6 }}
+                    className="p-6 border border-zinc-800 rounded-xl"
+                  >
+                    <h3 className="font-semibold mb-3">{c.title}</h3>
+                    <p className="text-zinc-400">{c.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
 
-      <section id="projects" className="py-20 px-6 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl font-bold text-center mb-16"
-          >
-            پروژه‌های من
-          </motion.h2>
+          <section id="skills" className="py-24 px-6">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold mb-12 text-center">
+                {t[lang].skills}
+              </h2>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid md:grid-cols-3 gap-6 mb-12"
-          >
-            {projects.map((project, idx) => (
-              <motion.div
-                key={idx}
-                variants={itemVariants}
-                whileHover={{ y: -10, scale: 1.02 }}
-                className={`p-6 border rounded-2xl transition-all group cursor-pointer ${
-                  theme === "dark"
-                    ? "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
-                    : "bg-white border-zinc-200 hover:border-zinc-300"
-                }`}
-              >
-                <div
-                  className={`w-full h-2 rounded-full bg-linear-to-r ${project.color} mb-6`}
-                />
-                <h3 className="text-xl font-bold mb-3">{project.title}</h3>
-                <p
-                  className={`mb-4 leading-relaxed ${
-                    theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-                  }`}
+              <div className="grid md:grid-cols-4 gap-6">
+                {stack.map((s, i) => (
+                  <motion.div
+                    key={i}
+                    whileHover={{ y: -8 }}
+                    className="p-6 border border-zinc-800 rounded-xl hover:border-blue-500"
+                  >
+                    <div className="text-3xl mb-3">{s.icon}</div>
+                    <h3 className="font-semibold mb-2">{s.name}</h3>
+                    <p className="text-sm text-zinc-400">{s.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section id="projects" className="py-24 px-6">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold mb-12 text-center">
+                {t[lang].projects}
+              </h2>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                {t[lang].projectsList.map((p, i) => (
+                  <motion.div
+                    key={i}
+                    whileHover={{ y: -8 }}
+                    className="p-6 border border-zinc-800 rounded-xl"
+                  >
+                    <h3 className="font-bold mb-2">{p.title}</h3>
+                    <p className="text-zinc-400">{p.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="text-center mt-12 flex justify-center gap-4 flex-wrap">
+                <a
+                  href="https://github.com/KamyarKazemi"
+                  target="_blank"
+                  className="cursor-pointer px-6 py-3 border rounded-lg hover:bg-zinc-800 transition"
                 >
-                  {project.desc}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {project.tech.map((tech, i) => (
-                    <span
-                      key={i}
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        theme === "dark"
-                          ? "bg-zinc-800 text-zinc-300"
-                          : "bg-zinc-100 text-zinc-700"
-                      }`}
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+                  {t[lang].github}
+                </a>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <motion.a
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              href="https://github.com/KamyarKazemi"
-              target="_blank"
-              className={`inline-flex items-center gap-3 px-8 py-4 border-2 rounded-xl font-semibold text-lg transition-all ${
-                theme === "dark"
-                  ? "bg-zinc-900 hover:bg-zinc-800 border-zinc-700 hover:border-blue-500"
-                  : "bg-white hover:bg-zinc-50 border-zinc-300 hover:border-blue-400"
-              }`}
-            >
-              <span>مشاهده همه پروژه‌ها در گیت‌هاب</span>
-              <motion.span
-                animate={{ x: [-5, 0, -5] }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                ←
-              </motion.span>
-            </motion.a>
-          </motion.div>
-        </div>
-      </section>
+                <a
+                  href="https://instagram.com/"
+                  target="_blank"
+                  className="cursor-pointer px-6 py-3 border rounded-lg hover:bg-zinc-800 transition"
+                >
+                  {t[lang].instagram}
+                </a>
+              </div>
+            </div>
+          </section>
 
-      <footer
-        className={`border-t backdrop-blur-sm py-8 text-center relative z-10 transition-colors ${
-          theme === "dark"
-            ? "border-zinc-800 bg-zinc-900/50"
-            : "border-zinc-200 bg-zinc-50/50"
-        }`}
-      >
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className={theme === "dark" ? "text-zinc-400" : "text-zinc-600"}
-        >
-          ساخته شده با ❤️ توسط کامیار
-        </motion.p>
-        <p
-          className={`text-sm mt-2 ${
-            theme === "dark" ? "text-zinc-600" : "text-zinc-400"
-          }`}
-        >
-          2024
-        </p>
-      </footer>
-    </div>
+          <footer className="py-10 text-center border-t border-zinc-800">
+            <p className="text-zinc-400">Built by {t[lang].name}</p>
+          </footer>
+        </motion.div>
+      </AnimatePresence>
+    </motion.div>
   );
 }
